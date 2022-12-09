@@ -1,5 +1,3 @@
-import os
-
 PROJECT_NETWORK_NAME="NetworkingDev"
 PROJECT_ENVIRONMENT="Development"
 PROJECT_COST_NAME="AWS"
