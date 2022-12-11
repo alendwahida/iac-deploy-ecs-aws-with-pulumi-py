@@ -1,2 +1,8 @@
 config:
+  aws-fargate-deployment-py:LB_HOST_NGINX_DEV:
+    secure: AAABAC4N7UcLsOF54TxxRlA0pj2qJORgRMbJCTUr5xxW7j3gb4MPqJYDhPkJhlMksdZDqkQHGTOr
+  aws-fargate-deployment-py:LB_HOST_TUTUM_DEV:
+    secure: AAABAF5BH9BBteQ59suCiAQfzWz50GbX+l8x34JLOkexuLYbGwRKwoUUXORtnqhtc41nzKVGy2cY
+  aws-fargate-deployment-py:LB_SSL_ARN_DEV:
+    secure: AAABAN6ivw4G5URv79N4bpUVqwZb+tu9Po+VzJwHph5l5VMkukVnLXYkJU01z3m+RZYofgScbsFBh4ALK9z4X8FDJIFHCeEaSryy698BDDOvnS2se/NYDNmD9Z1cFSB3rE3AvceMQH8gQHCxG0Y3b2MPxw==
   aws:region: us-east-1

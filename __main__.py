@@ -7,12 +7,14 @@ import networking.vpcDev as vpcdev
 import vars.projects as var
 import routing.elbDev as elbdev
 
+##########################################################################
+# Project ECS Cluster Initialize
 cluster=aws.ecs.Cluster(
-    "DevCluster",
+    var.PROJECT_ECS_NAME,
     settings=[
         aws.ecs.ClusterSettingArgs(
             name="containerInsights",
-            value="enabled"
+            value="disabled"
         )
     ],
     tags={
@@ -27,8 +29,8 @@ cluster=aws.ecs.Cluster(
 task_definition_tutum_dev = aws.ecs.TaskDefinition(
     var.ECS_PROJECT_TUTUM+"-task-dev",
     family=var.ECS_PROJECT_TUTUM+"-task-definition",
-    cpu="256",
-    memory="512",
+    cpu=var.ECS_TASK_CPU_TUTUM,
+    memory=var.ECS_TASK_MEM_TUTUM,
     network_mode="awsvpc",
     requires_compatibilities=["FARGATE"],
     execution_role_arn=elbdev.role.arn,
@@ -36,7 +38,7 @@ task_definition_tutum_dev = aws.ecs.TaskDefinition(
         "name": var.ECS_PROJECT_TUTUM+"-dev",
         "image": var.ECS_IMAGE_TUTUM,
         "portMappings": [{
-            "containerPort": var.ECS_CONTAINER_PORT,
+            "containerPort": var.ECS_CONTAINER_PORT_TUTUM,
             "hostPort": 80,
             "protocol": "tcp"
         }],
@@ -68,9 +70,9 @@ service_tutum_dev = aws.ecs.Service(
         "security_groups": [elbdev.group.id]
     },
     load_balancers=[{
-        "target_group_arn": elbdev.tg_webapp.arn,
+        "target_group_arn": elbdev.tg_tutum.arn,
         "container_name": var.ECS_PROJECT_TUTUM+"-dev",
-        "container_port": var.ECS_CONTAINER_PORT
+        "container_port": var.ECS_CONTAINER_PORT_TUTUM
     }],
     opts=pulumi.ResourceOptions(depends_on=[elbdev.listenerhttp,elbdev.listenerhttps]),
     tags={
@@ -85,8 +87,8 @@ service_tutum_dev = aws.ecs.Service(
 task_definition_nginx_dev = aws.ecs.TaskDefinition(
     var.ECS_PROJECT_NGINX+"-task-dev",
     family=var.ECS_PROJECT_NGINX+"-task-definition",
-    cpu="256",
-    memory="512",
+    cpu=var.ECS_TASK_CPU_NGINX,
+    memory=var.ECS_TASK_MEM_NGINX,
     network_mode="awsvpc",
     requires_compatibilities=["FARGATE"],
     execution_role_arn=elbdev.role.arn,
@@ -94,7 +96,7 @@ task_definition_nginx_dev = aws.ecs.TaskDefinition(
         "name": var.ECS_PROJECT_NGINX+"-dev",
         "image": var.ECS_IMAGE_NGINX,
         "portMappings": [{
-            "containerPort": var.ECS_CONTAINER_PORT,
+            "containerPort": var.ECS_CONTAINER_PORT_NGINX,
             "hostPort": 80,
             "protocol": "tcp"
         }],
@@ -125,7 +127,7 @@ service_nginx_dev = aws.ecs.Service(
     load_balancers=[{
         "target_group_arn": elbdev.tg_nginx.arn,
         "container_name": var.ECS_PROJECT_NGINX+"-dev",
-        "container_port": var.ECS_CONTAINER_PORT
+        "container_port": var.ECS_CONTAINER_PORT_NGINX
     }],
     opts=pulumi.ResourceOptions(depends_on=[elbdev.listenerhttp,elbdev.listenerhttps]),
     tags={
