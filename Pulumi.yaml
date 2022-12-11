@@ -1,5 +1,5 @@
-name: pulumi-iac-workshop-ecs
-description: A minimal Python Pulumi program
+name: aws-fargate-deployment-py
+description: Iac for fargate deployment
 runtime:
     name: python
     options:

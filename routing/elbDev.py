@@ -6,6 +6,8 @@ import pulumi_awsx as awsx
 import networking.vpcDev as vpcdev
 import vars.projects as var
 
+###########################################################################
+# SecurityGroup
 group=aws.ec2.SecurityGroup(
     "secgroup-webapp-dev",
     vpc_id=vpcdev.infradev.id,
@@ -34,6 +36,8 @@ group=aws.ec2.SecurityGroup(
     }
 )
 
+###########################################################################
+# Setup Loadbalancer
 alb=aws.lb.LoadBalancer(
     "lb-webapp-dev",
     security_groups=[group.id],
@@ -45,7 +49,9 @@ alb=aws.lb.LoadBalancer(
     }
 )
 
-target_group=aws.lb.TargetGroup(
+###########################################################################
+# Webapp target Group
+tg_tutum=aws.lb.TargetGroup(
     "tg-webapp-dev",
     port=80,
     protocol="HTTP",
@@ -57,16 +63,35 @@ target_group=aws.lb.TargetGroup(
         "Environment": var.PROJECT_ENVIRONMENT
     }
 )
+# Nginx target Group
+tg_nginx=aws.lb.TargetGroup(
+    "tg-nginx-dev",
+    port=80,
+    protocol="HTTP",
+    target_type="ip",
+    vpc_id=vpcdev.infradev.id,
+    tags={
+        "Name": "tg-"+var.PROJECT_ECS_NAME+"-"+var.PROJECT_ENVIRONMENT,
+        "Cost": var.PROJECT_COST_NAME,
+        "Environment": var.PROJECT_ENVIRONMENT
+    }
+)
 
+###########################################################################
+# Setup Default Listener
 listenerhttp=aws.lb.Listener(
-    "webapp-http-dev",
+    "http-dev",
     load_balancer_arn=alb.arn,
     port=80,
     protocol="HTTP",
     default_actions=[
         aws.lb.ListenerDefaultActionArgs(
-            type="forward",
-            target_group_arn=target_group.arn
+            type="fixed-response",
+            fixed_response=aws.lb.ListenerDefaultActionFixedResponseArgs(
+                content_type="text/plain",
+                message_body="HTTP",
+                status_code="200"
+            )
         )
     ],
     tags={
@@ -77,7 +102,7 @@ listenerhttp=aws.lb.Listener(
 )
 
 listenerhttps=aws.lb.Listener(
-    "webapp-https-dev",
+    "https-dev",
     load_balancer_arn=alb.arn,
     port=443,
     protocol="HTTPS",
@@ -85,8 +110,12 @@ listenerhttps=aws.lb.Listener(
     certificate_arn=var.LB_SSL_ARN_DEV,
     default_actions=[
         aws.lb.ListenerDefaultActionArgs(
-            type="forward",
-            target_group_arn=target_group.arn
+            type="fixed-response",
+            fixed_response=aws.lb.ListenerDefaultActionFixedResponseArgs(
+                content_type="text/plain",
+                message_body="HTTPS",
+                status_code="200"
+            )
         )
     ],
     tags={
@@ -95,24 +124,42 @@ listenerhttps=aws.lb.Listener(
         "Environment": var.PROJECT_ENVIRONMENT
     }
 )
-
-listenerRuleHttps=aws.lb.ListenerRule(
-    "listenerRuleHttps",
+###########################################################################
+# Listener Rules for Webapp
+listenerRuleHttps_webapp=aws.lb.ListenerRule(
+    "listenerRuleHttpsTutum",
     listener_arn=listenerhttps.arn,
-    priority=1,
     actions=[aws.lb.ListenerRuleActionArgs(
         type="forward",
-        target_group_arn=target_group.arn
+        target_group_arn=tg_tutum.arn
     )],
     conditions=[
         aws.lb.ListenerRuleConditionArgs(
             host_header=aws.lb.ListenerRuleConditionHostHeaderArgs(
-                values=[var.LB_HOST_TEST_DEV]
+                values=[var.LB_HOST_TUTUM_DEV]
+            )
+        )
+    ]
+)
+# Listener Rules for Nginx
+listenerRuleHttps_nginx=aws.lb.ListenerRule(
+    "listenerRuleHttpsNginx",
+    listener_arn=listenerhttps.arn,
+    actions=[aws.lb.ListenerRuleActionArgs(
+        type="forward",
+        target_group_arn=tg_nginx.arn
+    )],
+    conditions=[
+        aws.lb.ListenerRuleConditionArgs(
+            host_header=aws.lb.ListenerRuleConditionHostHeaderArgs(
+                values=[var.LB_HOST_NGINX_DEV]
             )
         )
     ]
 )
 
+##########################################################################
+# Iam Role for ELB - ECS Fargate
 role=aws.iam.Role(
     "task-exec-role-dev",
     assume_role_policy=json.dumps({
