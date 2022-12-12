@@ -1,2 +1,3 @@
-# iac-deploy-ecs-aws-with-pulumi-py
-Deployment the project into AWS ECS Fargate based
+## iac-deploy-ecs-aws-with-pulumi-py
+
+Deploy multi project (Container Based) into AWS ECS Fargate with Autoscaling Policy
