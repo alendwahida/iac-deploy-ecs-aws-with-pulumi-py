@@ -4,7 +4,8 @@ import pulumi_aws as aws
 import pulumi_awsx as awsx
 import networking.vpcDev as vpcdev
 import vars.varProjectDev as var
-import routing.elbDev as elbdev
+import elb.elbDev as elbdev
+import iam.iamRoleDev as iam
 from pulumi import Output
 from datetime import datetime
 
@@ -35,7 +36,7 @@ task_definition_tutum_dev = aws.ecs.TaskDefinition(
     memory=var.ECS_TASK_MEM_TUTUM,
     network_mode="awsvpc",
     requires_compatibilities=["FARGATE"],
-    execution_role_arn=elbdev.role.arn,
+    execution_role_arn=iam.role.arn,
     container_definitions=json.dumps([{
         "name": var.ECS_PROJECT_TUTUM+"-dev",
         "image": var.ECS_IMAGE_TUTUM,
@@ -121,7 +122,7 @@ task_definition_nginx_dev = aws.ecs.TaskDefinition(
     memory=var.ECS_TASK_MEM_NGINX,
     network_mode="awsvpc",
     requires_compatibilities=["FARGATE"],
-    execution_role_arn=elbdev.role.arn,
+    execution_role_arn=iam.role.arn,
     container_definitions=json.dumps([{
         "name": var.ECS_PROJECT_NGINX+"-dev",
         "image": var.ECS_IMAGE_NGINX,
