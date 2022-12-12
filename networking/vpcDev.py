@@ -1,7 +1,7 @@
 import pulumi
 import pulumi_aws as aws
 
-import vars.projects as var
+import vars.varProjectDev as var
 
 infradev=aws.ec2.Vpc(
     "vpc-dev",

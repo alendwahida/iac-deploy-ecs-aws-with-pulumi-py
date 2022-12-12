@@ -3,7 +3,7 @@ import pulumi
 import pulumi_aws as aws
 import pulumi_awsx as awsx
 import networking.vpcDev as vpcdev
-import vars.projects as var
+import vars.varProjectDev as var
 import routing.elbDev as elbdev
 from pulumi import Output
 from datetime import datetime
