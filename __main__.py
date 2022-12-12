@@ -212,3 +212,7 @@ ecs_policy_cpu_nginx_dev=aws.appautoscaling.Policy(
         scale_out_cooldown=20   # in seconds
     )
 )
+
+############################################
+# Expose url Loadbalance
+pulumi.export("URL: ", elbdev.alb.dns_name)
